@@ -18,25 +18,18 @@ namespace PrivatizeSpamMessage.PrivatizeSpamMessage
         internal static readonly MethodInfo transpiler = typeof(IsMessageSpamPatch).GetMethod(nameof(Transpiler), BindingFlags.NonPublic | BindingFlags.Static);
         public static void Patch(PatchContext ctx)
         {
-
             ctx.GetPattern(isMessageSpam).Transpilers.Add(transpiler);
 
-            Plugin.Log.Info("Patching Successful IsMessageSpam!");
+            Plugin.Log.Info("IsMessageSpam Patched Successfully!");
         }
         private static IEnumerable<MsilInstruction> Transpiler(IEnumerable<MsilInstruction> ins)
         {
-            //Disgusting but it works
-            int opCount = 0;
             var insList = ins.ToList();
             for (int i = 0; i < insList.Count; i++)
             {
-                if (insList[i].OpCode == OpCodes.Ldc_I4_1)
+                if (insList[i].OpCode == OpCodes.Ldc_I4_1 && insList[i + 1].OpCode != OpCodes.Ret)
                 {
-                    if (opCount % 2 == 0)
-                    {
-                        insList[i] = insList[i].CopyWith(OpCodes.Ldc_I4_3);
-                    }
-                    opCount++;
+                    insList[i] = insList[i].CopyWith(OpCodes.Ldc_I4_3);
                 }
             }
             return insList;
